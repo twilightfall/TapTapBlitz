@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a82493244b0c004ab4fbd35d294c7da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colorPrompt: 0
 --- !u!65 &-3261800052304765592
 BoxCollider:
   m_ObjectHideFlags: 0

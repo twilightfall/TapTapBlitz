@@ -1,20 +1,16 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Timers;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
-using UnityEngine.UI;
 
 public enum ButtonPrompt { RED, BLUE, GREEN, YELLOW };
 
 public class GameManager : MonoBehaviour
 {
     public GameObject buttonPrefab;
-    public Transform buttonPanel;
+    public RectTransform prompter;
     public GameObject retryButton;
 
     [Header("Text Display")]
@@ -34,14 +30,12 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     float countdown = 3;
 
-    const float gameTimer = 2f;
+    float gameTimer = 2f;
 
     int score = 0;
     string textPrompt;
     ButtonPrompt promptColor;
     
-    //List<GameObject> buttons = new();
-
     private IEnumerator countdownCoroutine;
 
     [SerializeField]
@@ -51,12 +45,15 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
+    GameMode currentMode;
+
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
         EnhancedTouchSupport.Enable();
+
         countdownCoroutine = StartCountdown();
     }
 
@@ -65,20 +62,6 @@ public class GameManager : MonoBehaviour
         StartCoroutine(countdownCoroutine);
         backAction = InputSystem.actions.FindAction("Back");
         backAction.performed += PauseGame;
-    }
-
-    void PauseGame(InputAction.CallbackContext ctx)
-    {
-        if (!pauseMenu.gameObject.activeSelf)
-        {
-            pauseMenu.gameObject.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            pauseMenu.gameObject.SetActive(false);
-            Time.timeScale = 1f;
-        }
     }
 
     void Update()
@@ -94,6 +77,18 @@ public class GameManager : MonoBehaviour
                 StopGame();
             }
         }
+    }
+
+    public void LoadGameModeData(GameMode mode)
+    {
+        currentMode = mode;
+
+    }
+
+    void Initialize()
+    {
+        gameTimer = currentMode.timerBase;
+        StartCoroutine(countdownCoroutine);
     }
 
     IEnumerator StartCountdown()
@@ -115,6 +110,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void PauseGame(InputAction.CallbackContext ctx)
+    {
+        if (!pauseMenu.gameObject.activeSelf)
+        {
+            pauseMenu.gameObject.SetActive(true);
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            pauseMenu.gameObject.SetActive(false);
+            Time.timeScale = 1f;
+        }
+    }
+
     public void Retry()
     {
         StartCoroutine(countdownCoroutine);
@@ -130,6 +139,9 @@ public class GameManager : MonoBehaviour
         countdown = 3;
         timer = gameTimer;
         score = 0;
+        scoreText.text = score.ToString();
+
+        prompter.gameObject.SetActive(true);
 
         GridManager.instance.SpawnButtons();
         GridManager.instance.EnableButtons();

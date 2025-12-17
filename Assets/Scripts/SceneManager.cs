@@ -4,23 +4,18 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
-public class SceneManager : MonoBehaviour
+public class SceneController : MonoBehaviour
 {
-   public static SceneManager instance;
+    public static SceneController instance;
 
-    InputAction backAct;
+    [Header("Game Modes")]
+    public List<GameMode> gameModes = new();
 
-    public TMP_Text text;
-
-    float x = 0;
-
-    private IEnumerator coroute;
-
-    public bool isPaused = false;
-
-    public bool gameStarted = false; 
-    public float countdown = 20;
+    [Header("UI Elements")]
+    [SerializeField] TMP_Text levelInfoText;
+    [SerializeField] GameObject startButton;
 
     private void Awake()
     {
@@ -31,67 +26,25 @@ public class SceneManager : MonoBehaviour
         }
         else Destroy(gameObject);
 
-        //coroute = UpdateText();
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void Start()
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
-        backAct = InputSystem.actions.FindAction("Back");
-        backAct.performed += PauseGame;
+        if(SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            GameManager.instance.SendMessage("StartGame");
+        }
     }
 
-    //IEnumerator UpdateText()
-    //{
-    //    print("started");
-    //    while (true)
-    //    {
-    //        text.text = countdown.ToString("F0");
-    //        countdown--;
-
-    //        if (countdown < 0)
-    //        {
-    //            print("GO!");
-    //            End();
-    //        }
-
-    //        yield return new WaitForSeconds(1f);
-    //    }
-    //}
-
-    //private void Start()
-    //{
-    //    StartCoroutine(coroute);
-    //}
-
-    //void End()
-    //{
-    //    print("end");
-    //    gameStarted = true;
-    //    countdown = 2;
-    //    StopAllCoroutines();
-    //}
-
-    //public void StartCR()
-    //{
-    //    gameStarted = false;    
-    //    StartCoroutine(coroute);
-    //}
-
-    //public void EndCR()
-    //{
-    //           StopCoroutine(coroute);
-    //    gameStarted = false;
-    //    countdown = 2;
-    //    text.text = "";
-    //}
+    public void ShowLevelInfo(int level)
+    {
+        levelInfoText.text = gameModes[level].modeDescription;
+        startButton.SetActive(true);
+    }
 
     public void LoadScene()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(1);
-    }
-
-    public void PauseGame(InputAction.CallbackContext ctx)
-    {
-        
     }
 }

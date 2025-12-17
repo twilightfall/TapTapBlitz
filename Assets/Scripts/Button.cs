@@ -16,16 +16,6 @@ public class Button : MonoBehaviour
         colorPrompt = color;
     }
 
-    //public void EnableTap()
-    //{
-    //    UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnTap;
-    //}
-
-    //public void DisableTap()
-    //{
-    //    UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnTap;
-    //}
-
     public void OnTap(Finger finger)
     {
         if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count > 0)
@@ -45,19 +35,4 @@ public class Button : MonoBehaviour
             }
         }
     }
-
-    //public void TapSelected(InputAction.CallbackContext ctx)
-    //{
-    //    if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count > 0)
-    //    {
-    //        Ray ray = Camera.main.ScreenPointToRay(UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0].screenPosition);
-    //        if (Physics.Raycast(ray, out RaycastHit hit))
-    //        {
-    //            if (hit.transform == transform)
-    //            {
-    //                print(name);
-    //            }
-    //        }
-    //    }
-    //}
 }

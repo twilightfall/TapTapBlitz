@@ -11,15 +11,17 @@ public class GridManager : MonoBehaviour
     public GameObject buttonPrefab;
     public Transform parentGrid;
 
-    public int gridWidth = 5;
-    public int gridHeight = 5;
+    public int columns = 2;
+    public int rows = 5;
     public float cellSize = 1.2f;
     public float padding = 1.5f;
 
     public float[,] grid;
-    int columns, rows;
 
+    [SerializeField]
     List<GameObject> gameButtons = new();
+
+    [SerializeField]
     List<Vector3> gridPositions = new();
 
     public static GridManager instance;
@@ -55,6 +57,7 @@ public class GridManager : MonoBehaviour
         foreach (ButtonPrompt color in System.Enum.GetValues(typeof(ButtonPrompt)))
         {
             GameObject button = Instantiate(buttonPrefab);
+            //button.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Sprites/{color}");
             button.GetComponent<SpriteRenderer>().color = color switch
             {
                 ButtonPrompt.RED => Color.red,
@@ -80,6 +83,16 @@ public class GridManager : MonoBehaviour
         parentGrid.SetPositionAndRotation(new(-padding / 2f, -padding / 2f, 0), Quaternion.identity);
     }
 
+    public void ClearButtons()
+    {
+        foreach (GameObject button in gameButtons)
+        {
+            Destroy(button);
+        }
+
+        gameButtons.Clear();
+    }
+
     public void EnableButtons()
     {
         foreach (GameObject button in gameButtons)
@@ -103,10 +116,7 @@ public class GridManager : MonoBehaviour
         for (int count = 0; count < gridPositions.Count; count++)
         {
             gameButtons[count].transform.SetLocalPositionAndRotation(gridPositions[count], Quaternion.identity);
-            //gameButtons[count].transform.SetParent(parentGrid, true);
             gameButtons[count].transform.localScale = new(cellSize, cellSize, 1);
         }
-
-        //parentGrid.SetPositionAndRotation(new(-padding / 2f, -padding / 2f, 0), Quaternion.identity);
     }
 }
