@@ -10,19 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c9ce349744248b47a1159b96e873ac0, type: 3}
-  m_Name: BeginnerGameMode
+  m_Name: DuelGameMode
   m_EditorClassIdentifier: 
-  timerBase: 5
-  timerDecay: 1.5
-  timerMax: 2
-  decayInterval: 5
-  modeDescription: Play with increased reaction time, but the more you score the
-    faster the game gets!
-  hintText: Tap the color of the word shown, not the color the word is! You have
-    5 seconds at the start, but things get faster the longer you play! Tap as fast
-    as you can and see if you can get a high score!
+  timerBase: 1.5
+  timerDecay: 0
+  timerMax: 1.5
+  decayInterval: 0
+  modeDescription: Go head to head with another player! Turns are completely random,
+    so pay attention now!
+  hintText: 
   isActive: 0
-  isMultiplayer: 0
+  isMultiplayer: 1
   columns: 2
   rows: 2
   cellSize: 1.2

@@ -10,20 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c9ce349744248b47a1159b96e873ac0, type: 3}
-  m_Name: ClassicGameMode
+  m_Name: AdvancedGameMode
   m_EditorClassIdentifier: 
-  timerBase: 2
+  timerBase: 0
   timerDecay: 0
-  timerMax: 2
+  timerMax: 0
   decayInterval: 0
-  modeDescription: Play the original version of the game with only a couple seconds
-    to react!
-  hintText: Tap the color of the word shown, not the color the word is! You have
-    two seconds before the game ends. Tap as fast as you can and see if you can get
-    a high score!
+  modeDescription: 
+  hintText: 
   isActive: 0
   isMultiplayer: 0
-  columns: 2
-  rows: 2
-  cellSize: 1.2
-  padding: 1.5
+  columns: 0
+  rows: 0
+  cellSize: 0
+  padding: 0

@@ -25,12 +25,7 @@ public class Button : MonoBehaviour
             {
                 if (hit.transform == transform)
                 {
-                    if (GameManager.instance.DidScore(colorPrompt))
-                    {
-                        GameManager.instance.SetPrompt();
-                        GridManager.instance.ShuffleGrid();
-                    }
-                    else return;
+                    GameManager.onButtonTap?.Invoke(colorPrompt);
                 }
             }
         }

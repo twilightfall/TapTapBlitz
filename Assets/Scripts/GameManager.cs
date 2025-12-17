@@ -1,67 +1,78 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.SceneManagement;
 
 public enum ButtonPrompt { RED, BLUE, GREEN, YELLOW };
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Prefabs")]
     public GameObject buttonPrefab;
     public RectTransform prompter;
     public GameObject retryButton;
+    public Transform gameGrid;
 
     [Header("Text Display")]
     [SerializeField] TMP_Text scoreText;
+    [SerializeField] TMP_Text p2ScoreText;
     [SerializeField] TMP_Text promptText;
     [SerializeField] TMP_Text timerText;
 
-    [SerializeField]
-    RectTransform pauseMenu;
+    [Header("Pause Menu")]
+    [SerializeField] RectTransform pauseMenu;
+    [SerializeField] TMP_Text hintText;
+
+    [Header("Game Modes")]
+    public List<GameMode> gameModes = new();
+
+    [Header("Game Variables")]
+    float timer;
+    float countdown = 3;
+    int score = 0;
+    string textPrompt;
+    ButtonPrompt promptColor;
+    bool gameStarted = false;
 
     [Header("Debug")]
     [SerializeField]
     TMP_Text debugTimer;
-    [SerializeField]
-    float timer;
-
-    [SerializeField]
-    float countdown = 3;
-
-    float gameTimer = 2f;
-
-    int score = 0;
-    string textPrompt;
-    ButtonPrompt promptColor;
     
     private IEnumerator countdownCoroutine;
 
-    [SerializeField]
-    bool gameStarted = false;
+    public delegate void OnButtonTap(ButtonPrompt prompt);
+    public static OnButtonTap onButtonTap;
 
     InputAction backAction;
 
-    public static GameManager instance;
-
     GameMode currentMode;
 
-    private void Awake()
+    void Awake()
     {
-        if (instance == null) instance = this;
-        else Destroy(gameObject);
-
         EnhancedTouchSupport.Enable();
 
         countdownCoroutine = StartCountdown();
+    
+        backAction = InputSystem.actions.FindAction("Back");
+        backAction.performed += PauseGame;
+
+        onButtonTap += DidScore;
     }
 
     void Start()
     {
-        StartCoroutine(countdownCoroutine);
-        backAction = InputSystem.actions.FindAction("Back");
-        backAction.performed += PauseGame;
+        Initialize();
+    }
+
+    void OnDisable()
+    {
+        backAction.performed -= PauseGame;
     }
 
     void Update()
@@ -69,7 +80,7 @@ public class GameManager : MonoBehaviour
         if (timer > 0f && gameStarted)
         {
             timer -= Time.deltaTime;
-            debugTimer.text = timer.ToString();
+            //debugTimer.text = timer.ToString();
 
             if (timer <= 0f)
             {
@@ -79,16 +90,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void LoadGameModeData(GameMode mode)
-    {
-        currentMode = mode;
-
-    }
-
     void Initialize()
     {
-        gameTimer = currentMode.timerBase;
-        StartCoroutine(countdownCoroutine);
+        foreach (GameMode mode in gameModes)
+        {
+            if (mode.isActive)
+            {
+                currentMode = mode;
+                timer = currentMode.timerBase;
+
+                hintText.text = currentMode.hintText; 
+
+                GridManager.GenerateGrid(currentMode.columns, currentMode.rows, currentMode.padding);
+
+                StartCoroutine(countdownCoroutine);
+                break;
+            }
+        }
     }
 
     IEnumerator StartCountdown()
@@ -110,89 +128,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void PauseGame(InputAction.CallbackContext ctx)
-    {
-        if (!pauseMenu.gameObject.activeSelf)
-        {
-            pauseMenu.gameObject.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            pauseMenu.gameObject.SetActive(false);
-            Time.timeScale = 1f;
-        }
-    }
-
-    public void Retry()
-    {
-        StartCoroutine(countdownCoroutine);
-        retryButton.SetActive(false);
-    }
-
-    private void StartGame()
+    void StartGame()
     {
         StopCoroutine(countdownCoroutine);
+
         gameStarted = true;
         timerText.gameObject.SetActive(false);
         timerText.text = "";
         countdown = 3;
-        timer = gameTimer;
+        timer = currentMode.timerBase;
         score = 0;
         scoreText.text = score.ToString();
 
         prompter.gameObject.SetActive(true);
 
-        GridManager.instance.SpawnButtons();
-        GridManager.instance.EnableButtons();
+        GridManager.SpawnButtons(buttonPrefab, gameGrid, currentMode.cellSize, currentMode.padding);
+        GridManager.EnableButtons();
 
         SetPrompt();
     }
 
-    public bool DidScore(ButtonPrompt prompt)
+    void SetPrompt()
     {
-        if(promptColor == prompt)
-        {
-            UpdateScore();
-            timer = 1.5f;
-            return true;
-        }
-        else
-        {
-            StopGame(true);
-            return false;
-        }
-    }
+        if (!prompter.gameObject.activeSelf) prompter.gameObject.SetActive(true);
 
-    public void UpdateScore()
-    {
-        score++;
-        scoreText.text = score.ToString();
-    }
+        promptColor = (ButtonPrompt)UnityEngine.Random.Range(0, Enum.GetValues(typeof(ButtonPrompt)).Length);
+        textPrompt = Enum.GetName(typeof(ButtonPrompt), (ButtonPrompt)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(ButtonPrompt)).Length));
 
-    public void StopGame(bool didNotScore = false)
-    {
-        print("stopped");
-        GridManager.instance.DisableButtons();
-
-        timerText.gameObject.SetActive(true);
-
-        _ = didNotScore ? timerText.text = $"X" : timerText.text = $"TIME'S UP!";
-        gameStarted = false;
-
-        countdown = 3;
-        timer = gameTimer;
-
-        retryButton.SetActive(true);
-    }
-
-    public void SetPrompt()
-    {
-        promptColor = (ButtonPrompt)Random.Range(0, System.Enum.GetValues(typeof(ButtonPrompt)).Length);
-        textPrompt = System.Enum.GetName(typeof(ButtonPrompt), (ButtonPrompt)Random.Range(0, System.Enum.GetValues(typeof(ButtonPrompt)).Length));
-        
         promptText.text = textPrompt;
-        
+
         promptText.color = promptColor switch
         {
             ButtonPrompt.RED => Color.red,
@@ -205,29 +169,70 @@ public class GameManager : MonoBehaviour
         print($"TAP {promptColor} --- NOT {textPrompt}");
     }
 
+    void StopGame(bool didNotScore = false)
+    {
+        print("stopped");
+        GridManager.DisableButtons();
+        timerText.gameObject.SetActive(true);
+
+        _ = didNotScore ? timerText.text = $"X" : timerText.text = $"TIME'S UP!";
+        gameStarted = false;
+
+        prompter.gameObject.SetActive(false);
+
+        countdown = 3;
+        timer = currentMode.timerBase;
+
+        retryButton.SetActive(true);
+    }
+
+    void DidScore(ButtonPrompt prompt)
+    {
+        if (promptColor == prompt)
+        {
+            UpdateScore();
+            timer = currentMode.timerBase;
+            GridManager.ShuffleGrid();
+            SetPrompt();
+        }
+        else
+        {
+            StopGame(true);
+        }
+    }
+
+    void UpdateScore()
+    {
+        score++;
+        scoreText.text = score.ToString();
+    }
+
+    void PauseGame(InputAction.CallbackContext ctx)
+    {
+        if (!pauseMenu.gameObject.activeSelf)
+        {
+            pauseMenu.gameObject.SetActive(true);
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            pauseMenu.gameObject.SetActive(false);
+            Time.timeScale = 1f;
+
+            //todo: add confirmation logic to end game here
+            //SceneManager.LoadScene(0);
+        }
+    }
+
     public void ClosePause()
     {
         pauseMenu.gameObject.SetActive(false);
         Time.timeScale = 1f;
     }
 
-    //void GenerateButtons()
-    //    {
-    //        foreach (ButtonPrompt prompt in System.Enum.GetValues(typeof(ButtonPrompt)))
-    //        {
-    //            GameObject button = Instantiate(buttonPrefab, buttonPanel);
-    //            button.GetComponent<Button>().SetColor(prompt);
-    //            buttons.Add(button);
-    //        }
-    //    }
-
-    //void RandomizeButtons()
-    //    {
-    //        foreach (GameObject button in buttons)
-    //        {
-    //            int randomIndex = Random.Range(0, buttons.Count);
-    //            button.transform.SetSiblingIndex(randomIndex);
-    //        }
-    //        LayoutRebuilder.ForceRebuildLayoutImmediate(buttonPanel.GetComponent<RectTransform>());
-    //    }
+    public void Retry()
+    {
+        StartCoroutine(countdownCoroutine);
+        retryButton.SetActive(false);
+    }
 }

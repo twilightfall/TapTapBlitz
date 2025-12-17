@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,56 +9,44 @@ using UnityEngine.InputSystem.EnhancedTouch;
 
 public class GridManager : MonoBehaviour
 {
-    public GameObject buttonPrefab;
-    public Transform parentGrid;
+    //public GameObject buttonPrefab;
+    //public static Transform parentGrid;
 
-    public int columns = 2;
-    public int rows = 5;
-    public float cellSize = 1.2f;
-    public float padding = 1.5f;
+    //public static int columns;
+    //public  static int rows;
+    //public  static float cellSize = 1.2f;
+    //public static float padding = 1.5f;
 
-    public float[,] grid;
-
-    [SerializeField]
-    List<GameObject> gameButtons = new();
+    public static float[,] grid;
 
     [SerializeField]
-    List<Vector3> gridPositions = new();
+    static List<GameObject> gameButtons = new();
 
-    public static GridManager instance;
+    [SerializeField]
+    static List<Vector2> gridPositions = new();
 
-    private void Awake()
+    public static void GenerateGrid(int columns, int rows, float padding)
     {
-        if (instance == null) instance = this;
-        else Destroy(gameObject);
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        columns = 2;
-        rows = 2;
         grid = new float[columns, rows];
 
         for (int col = 0; col < columns; col++)
         {
             for (int row = 0; row < rows; row++)
             {
-                Vector3 spawnVector = new(col * padding, row * padding, 0);
+                Vector2 spawnVector = new(col * padding, row * padding);
 
                 gridPositions.Add(spawnVector);
             }
-        }    
+        }
     }
 
-    public void SpawnButtons()
+    public static void SpawnButtons(GameObject buttonPrefab, Transform parentGrid, float cellSize, float padding)
     {
         if (gameButtons.Count > 0) return;
 
         foreach (ButtonPrompt color in System.Enum.GetValues(typeof(ButtonPrompt)))
         {
             GameObject button = Instantiate(buttonPrefab);
-            //button.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Sprites/{color}");
             button.GetComponent<SpriteRenderer>().color = color switch
             {
                 ButtonPrompt.RED => Color.red,
@@ -83,7 +72,7 @@ public class GridManager : MonoBehaviour
         parentGrid.SetPositionAndRotation(new(-padding / 2f, -padding / 2f, 0), Quaternion.identity);
     }
 
-    public void ClearButtons()
+    public static void ClearButtons()
     {
         foreach (GameObject button in gameButtons)
         {
@@ -93,7 +82,7 @@ public class GridManager : MonoBehaviour
         gameButtons.Clear();
     }
 
-    public void EnableButtons()
+    public static void EnableButtons()
     {
         foreach (GameObject button in gameButtons)
         {
@@ -101,7 +90,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void DisableButtons()
+    public static void DisableButtons()
     {
         foreach (GameObject button in gameButtons)
         {
@@ -109,7 +98,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void ShuffleGrid()
+    public static void ShuffleGrid(float cellSize, float padding)
     {
         gridPositions = gridPositions.OrderBy(x => Random.value).ToList();
 
@@ -117,6 +106,17 @@ public class GridManager : MonoBehaviour
         {
             gameButtons[count].transform.SetLocalPositionAndRotation(gridPositions[count], Quaternion.identity);
             gameButtons[count].transform.localScale = new(cellSize, cellSize, 1);
+        }
+    }
+
+    public static void ShuffleGrid()
+    {
+        gridPositions = gridPositions.OrderBy(x => Random.value).ToList();
+
+        for (int count = 0; count < gridPositions.Count; count++)
+        {
+            gameButtons[count].transform.SetLocalPositionAndRotation(gridPositions[count], Quaternion.identity);
+            //gameButtons[count].transform.localScale = new(cellSize, cellSize, 1);
         }
     }
 }

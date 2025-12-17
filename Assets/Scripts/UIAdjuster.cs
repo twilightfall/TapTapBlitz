@@ -37,8 +37,6 @@ public class UIAdjuster : MonoBehaviour
     {
         if (gamePanel != null)
         {
-            print(Screen.width + " " + Screen.height);
-
             gamePanel.sizeDelta = new Vector2(gamePanel.sizeDelta.x, Screen.height / 3 - 50);
         }
     }
