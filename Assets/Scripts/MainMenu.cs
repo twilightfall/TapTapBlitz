@@ -14,12 +14,15 @@ public class MainMenu : MonoBehaviour
 
     GameMode selectedMode;
 
+    public TMP_Text titl;
+
     private void OnEnable()
     {
         foreach (GameMode mode in gameModes)
         {
             mode.ResetMode();
         }
+
     }
 
     public void ShowLevelInfo(int level)
@@ -27,6 +30,11 @@ public class MainMenu : MonoBehaviour
         levelInfoText.text = gameModes[level].modeDescription;
         selectedMode = gameModes[level];
         startButton.SetActive(true);
+    }
+
+    public void rotat()
+    {
+        titl.transform.rotation = Quaternion.identity;
     }
 
     public void StartGame()

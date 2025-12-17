@@ -148,13 +148,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 59417473}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 833298732}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 540, y: -125}
@@ -2504,6 +2504,7 @@ MonoBehaviour:
   retryButton: {fileID: 1207560728}
   gameGrid: {fileID: 1069390006}
   scoreText: {fileID: 1277966287}
+  p2ScoreText: {fileID: 59417475}
   promptText: {fileID: 533385485}
   timerText: {fileID: 794347255}
   pauseMenu: {fileID: 1879027224}
@@ -2513,6 +2514,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 88c92d18c52412e4191da01bbf4cdb14, type: 2}
   - {fileID: 11400000, guid: 659c1d19cb5445f4cbbebb8064e9951d, type: 2}
   - {fileID: 11400000, guid: 0b233a4e352a8c244a1704c7295c7b4b, type: 2}
+  currentPlayer: 0
   debugTimer: {fileID: 1358393910}
 --- !u!4 &1451689371
 Transform:
@@ -2606,7 +2608,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
-  m_AdditionalShaderChannelsFlag: 7
+  m_AdditionalShaderChannelsFlag: 31
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -3042,7 +3044,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1994939413
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3057,10 +3059,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 503431511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 540, y: -400}
+  m_SizeDelta: {x: 980, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1994939414
 MonoBehaviour:

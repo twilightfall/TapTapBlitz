@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c9ce349744248b47a1159b96e873ac0, type: 3}
   m_Name: DuelGameMode
   m_EditorClassIdentifier: 
-  timerBase: 1.5
+  timerBase: 15
   timerDecay: 0
   timerMax: 1.5
   decayInterval: 0

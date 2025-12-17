@@ -32,10 +32,15 @@ public class GameManager : MonoBehaviour
     [Header("Game Modes")]
     public List<GameMode> gameModes = new();
 
-    [Header("Game Variables")]
+    // GAME VARIABLES
+    GameMode currentMode;
     float timer;
     float countdown = 3;
     int score = 0;
+    int p2Score = 0;
+    [SerializeField]
+    int currentPlayer;
+
     string textPrompt;
     ButtonPrompt promptColor;
     bool gameStarted = false;
@@ -51,7 +56,6 @@ public class GameManager : MonoBehaviour
 
     InputAction backAction;
 
-    GameMode currentMode;
 
     void Awake()
     {
@@ -99,7 +103,12 @@ public class GameManager : MonoBehaviour
                 currentMode = mode;
                 timer = currentMode.timerBase;
 
-                hintText.text = currentMode.hintText; 
+                hintText.text = currentMode.hintText;
+
+                if (mode.isMultiplayer)
+                {
+                    Initialize2P();
+                }
 
                 GridManager.GenerateGrid(currentMode.columns, currentMode.rows, currentMode.padding);
 
@@ -140,6 +149,12 @@ public class GameManager : MonoBehaviour
         score = 0;
         scoreText.text = score.ToString();
 
+        if (currentMode.isMultiplayer)
+        {
+            p2Score = 0;
+            p2ScoreText.text = p2Score.ToString();
+        }
+
         prompter.gameObject.SetActive(true);
 
         GridManager.SpawnButtons(buttonPrefab, gameGrid, currentMode.cellSize, currentMode.padding);
@@ -151,12 +166,10 @@ public class GameManager : MonoBehaviour
     void SetPrompt()
     {
         if (!prompter.gameObject.activeSelf) prompter.gameObject.SetActive(true);
-
+        
         promptColor = (ButtonPrompt)UnityEngine.Random.Range(0, Enum.GetValues(typeof(ButtonPrompt)).Length);
         textPrompt = Enum.GetName(typeof(ButtonPrompt), (ButtonPrompt)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(ButtonPrompt)).Length));
-
-        promptText.text = textPrompt;
-
+        
         promptText.color = promptColor switch
         {
             ButtonPrompt.RED => Color.red,
@@ -166,7 +179,24 @@ public class GameManager : MonoBehaviour
             _ => throw new System.NotImplementedException(),
         };
 
-        print($"TAP {promptColor} --- NOT {textPrompt}");
+        if (currentMode.isMultiplayer)
+        {
+            int nextPlayer  = UnityEngine.Random.Range(0, 2);
+
+            print($"NEXT PLAYER IS {nextPlayer}");
+            if (currentPlayer == 0 && nextPlayer == 1)
+            {
+                prompter.Rotate(0, 0, 180);
+            }
+            else if ((currentPlayer == 0 && nextPlayer == 0) ||(currentPlayer == 1 && nextPlayer == 0))
+            {
+                prompter.rotation = Quaternion.identity;
+            }
+
+                currentPlayer = nextPlayer;
+        }
+        
+        promptText.text = textPrompt;
     }
 
     void StopGame(bool didNotScore = false)
@@ -190,7 +220,7 @@ public class GameManager : MonoBehaviour
     {
         if (promptColor == prompt)
         {
-            UpdateScore();
+            UpdateScore(currentPlayer);
             timer = currentMode.timerBase;
             GridManager.ShuffleGrid();
             SetPrompt();
@@ -201,10 +231,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void UpdateScore()
+    void UpdateScore(int currentPlayer = 0)
     {
-        score++;
-        scoreText.text = score.ToString();
+        print($"CURRENT PLAYER IS {currentPlayer}");
+
+        if (currentPlayer == 0)
+        {
+            score++;
+            scoreText.text = score.ToString();
+        }
+        else
+        {
+            p2Score++;
+            p2ScoreText.text = p2Score.ToString();
+        }
     }
 
     void PauseGame(InputAction.CallbackContext ctx)
@@ -234,5 +274,10 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(countdownCoroutine);
         retryButton.SetActive(false);
+    }
+
+    void Initialize2P()
+    {
+        p2ScoreText.gameObject.SetActive(true);
     }
 }
