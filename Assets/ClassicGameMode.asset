@@ -16,11 +16,12 @@ MonoBehaviour:
   timerDecay: 0
   timerMax: 2
   decayInterval: 0
+  hasDecay: 0
   modeDescription: Play the original version of the game with only a couple seconds
-    to react!
-  hintText: Tap the color of the word shown, not the color the word is! You have
-    two seconds before the game ends. Tap as fast as you can and see if you can get
-    a high score!
+    to react! Tap the color of the word shown, not the color the word describes!
+  hintText: Tap the color of the word shown, not the color the word describes! You
+    have two seconds before the game ends. Tap as fast as you can and see if you
+    can get a high score!
   isActive: 0
   isMultiplayer: 0
   columns: 2
