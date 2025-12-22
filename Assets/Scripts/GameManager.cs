@@ -8,16 +8,19 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public enum ButtonPrompt { RED, BLUE, GREEN, YELLOW };
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Prefabs")]
+    [Header("Prefabs and Transforms")]
     public GameObject buttonPrefab;
     public RectTransform prompter;
     public GameObject retryButton;
     public Transform gameGrid;
+    public RectTransform p1HUD;
+    public RectTransform p2HUD;
 
     [Header("Text Display")]
     [SerializeField] TMP_Text scoreText;
@@ -35,6 +38,7 @@ public class GameManager : MonoBehaviour
     // GAME VARIABLES
     GameMode currentMode;
     float timer;
+    float currentTimer;
     float countdown = 3;
     int score = 0;
     int p2Score = 0;
@@ -48,7 +52,7 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField]
     TMP_Text debugTimer;
-    
+
     private IEnumerator countdownCoroutine;
 
     public delegate void OnButtonTap(ButtonPrompt prompt);
@@ -62,7 +66,7 @@ public class GameManager : MonoBehaviour
         EnhancedTouchSupport.Enable();
 
         countdownCoroutine = StartCountdown();
-    
+
         backAction = InputSystem.actions.FindAction("Back");
         backAction.performed += PauseGame;
 
@@ -84,7 +88,7 @@ public class GameManager : MonoBehaviour
         if (timer > 0f && gameStarted)
         {
             timer -= Time.deltaTime;
-            //debugTimer.text = timer.ToString();
+            debugTimer.text = timer.ToString();
 
             if (timer <= 0f)
             {
@@ -105,9 +109,12 @@ public class GameManager : MonoBehaviour
 
                 hintText.text = currentMode.hintText;
 
+                if(currentMode.hasDecay) currentTimer = timer;
+
                 if (mode.isMultiplayer)
                 {
-                    Initialize2P();
+                    p2ScoreText.gameObject.SetActive(true);
+                    scoreText.transform.Rotate(0, 0, 180);
                 }
 
                 GridManager.GenerateGrid(currentMode.columns, currentMode.rows, currentMode.padding);
@@ -163,13 +170,25 @@ public class GameManager : MonoBehaviour
         SetPrompt();
     }
 
+    float DecayTimer()
+    {
+        if (score > 0 && score % currentMode.decayInterval == 0)
+        {
+            if (currentMode.timerBase != currentMode.timerMax)
+                currentTimer =  currentMode.timerBase - currentMode.timerDecay;
+            return currentTimer;
+        }
+
+        return currentTimer;
+    }
+
     void SetPrompt()
     {
         if (!prompter.gameObject.activeSelf) prompter.gameObject.SetActive(true);
-        
+
         promptColor = (ButtonPrompt)UnityEngine.Random.Range(0, Enum.GetValues(typeof(ButtonPrompt)).Length);
         textPrompt = Enum.GetName(typeof(ButtonPrompt), (ButtonPrompt)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(ButtonPrompt)).Length));
-        
+
         promptText.color = promptColor switch
         {
             ButtonPrompt.RED => Color.red,
@@ -181,27 +200,26 @@ public class GameManager : MonoBehaviour
 
         if (currentMode.isMultiplayer)
         {
-            int nextPlayer  = UnityEngine.Random.Range(0, 2);
+            int nextPlayer = UnityEngine.Random.Range(0, 2);
 
-            print($"NEXT PLAYER IS {nextPlayer}");
             if (currentPlayer == 0 && nextPlayer == 1)
             {
                 prompter.Rotate(0, 0, 180);
             }
-            else if ((currentPlayer == 0 && nextPlayer == 0) ||(currentPlayer == 1 && nextPlayer == 0))
+            else if ((currentPlayer == 0 && nextPlayer == 0) || (currentPlayer == 1 && nextPlayer == 0))
             {
                 prompter.rotation = Quaternion.identity;
             }
 
-                currentPlayer = nextPlayer;
+            currentPlayer = nextPlayer;
+            SetActivePlayerBackground(currentPlayer);
         }
-        
+
         promptText.text = textPrompt;
     }
 
     void StopGame(bool didNotScore = false)
     {
-        print("stopped");
         GridManager.DisableButtons();
         timerText.gameObject.SetActive(true);
 
@@ -221,7 +239,13 @@ public class GameManager : MonoBehaviour
         if (promptColor == prompt)
         {
             UpdateScore(currentPlayer);
-            timer = currentMode.timerBase;
+
+            if (currentMode.hasDecay)
+            {
+                timer = DecayTimer();
+            }
+            else timer = currentMode.timerBase;
+
             GridManager.ShuffleGrid();
             SetPrompt();
         }
@@ -233,17 +257,23 @@ public class GameManager : MonoBehaviour
 
     void UpdateScore(int currentPlayer = 0)
     {
-        print($"CURRENT PLAYER IS {currentPlayer}");
-
-        if (currentPlayer == 0)
+        if (currentMode.isMultiplayer)
         {
-            score++;
-            scoreText.text = score.ToString();
+            if (currentPlayer == 0)
+            {
+                score++;
+                p2ScoreText.text = score.ToString();
+            }
+            else
+            {
+                p2Score++;
+                scoreText.text = p2Score.ToString();
+            }
         }
         else
         {
-            p2Score++;
-            p2ScoreText.text = p2Score.ToString();
+            score++;
+            scoreText.text = score.ToString();
         }
     }
 
@@ -260,7 +290,11 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
 
             //todo: add confirmation logic to end game here
-            //SceneManager.LoadScene(0);
+            if (ctx.performed)
+            {
+                StopAllCoroutines();
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
@@ -276,8 +310,23 @@ public class GameManager : MonoBehaviour
         retryButton.SetActive(false);
     }
 
-    void Initialize2P()
+    void SetActivePlayerBackground(int currentPlayer, bool isStopped = false)
     {
-        p2ScoreText.gameObject.SetActive(true);
+        if (currentPlayer == 0)
+        {
+            p2HUD.GetComponent<Image>().color = Color.white;
+            p1HUD.GetComponent<Image>().color = Color.black;
+        }
+        else
+        {
+            p1HUD.GetComponent<Image>().color = Color.white;
+            p2HUD.GetComponent<Image>().color = Color.black;
+        }
+
+        if (isStopped)
+        {
+            p1HUD.GetComponent<Image>().color = Color.black;
+            p2HUD.GetComponent<Image>().color = Color.black;
+        }
     }
 }

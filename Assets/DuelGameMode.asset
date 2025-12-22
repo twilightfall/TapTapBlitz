@@ -16,6 +16,7 @@ MonoBehaviour:
   timerDecay: 0
   timerMax: 1.5
   decayInterval: 0
+  hasDecay: 0
   modeDescription: Go head to head with another player! Turns are completely random,
     so pay attention now!
   hintText: 

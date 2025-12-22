@@ -12,6 +12,8 @@ public class GameMode : ScriptableObject
 
     public int decayInterval;
 
+    public bool hasDecay;
+
     [TextArea(3,10)]
     public string modeDescription;
 

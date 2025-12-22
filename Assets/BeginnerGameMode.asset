@@ -15,12 +15,14 @@ MonoBehaviour:
   timerBase: 5
   timerDecay: 1.5
   timerMax: 2
-  decayInterval: 5
+  decayInterval: 25
+  hasDecay: 1
   modeDescription: Play with increased reaction time, but the more you score the
-    faster the game gets!
-  hintText: Tap the color of the word shown, not the color the word is! You have
-    5 seconds at the start, but things get faster the longer you play! Tap as fast
-    as you can and see if you can get a high score!
+    faster the game gets Tap the color of the word shown, not the color the word
+    describes!
+  hintText: Tap the color of the word shown, not the color the word describes! You
+    have 5 seconds at the start, but things get faster the longer you play! Tap as
+    fast as you can and see if you can get a high score!
   isActive: 0
   isMultiplayer: 0
   columns: 2
